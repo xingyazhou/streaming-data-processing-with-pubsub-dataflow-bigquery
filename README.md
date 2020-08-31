@@ -3,7 +3,7 @@
 ## Introduction
 
 This project is to rewrite the streaming pipelines in Python (Apache Beam Python):
-1. Use Dataflow to collect traffic events from simulated traffic sensor data throught Google PubSub
+1. Use Dataflow to collect traffic events from simulated traffic sensor data through Google PubSub
 2. Process the simulated traffice sensor data in to average
 3. Write the data into BigQuery for futher analysis
 
