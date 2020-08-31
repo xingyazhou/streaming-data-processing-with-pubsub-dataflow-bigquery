@@ -2,7 +2,12 @@
 
 ## Introduction
 
-In this project,  Dataflow is used to collect traffic events from simulated traffic sensor data made available through Google Cloud PubSub, process them into an actionable average, and store the raw data in BigQuery for later analysis. 
+This project is to rewrite the streaming pipelines in Python (Apache Beam Python):
+1. Use Dataflow to collect traffic events from simulated traffic sensor data throught Google PubSub
+2. Process the simulated traffice sensor data in to average
+3. Write the data into BigQuery for futher analysis
 
-Streaming pipelines is written in Python (Apache Beam Python)
+At the time the original project was designed for GCP Data Engineering traing course at Cousera, streaming pipelines are not available in the DataFlow Python SDK. So the streaming labs are written in Java.
+
+
 
