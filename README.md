@@ -2,7 +2,7 @@
 
 ## Introduction
 
-[Google Cloud Platform training project:Streaming Data Processing](https://github.com/GoogleCloudPlatform/training-data-analyst/tree/master/courses/streaming)
+[Google Cloud Platform Data Engineering training project:Streaming Data Processing](https://github.com/GoogleCloudPlatform/training-data-analyst/tree/master/courses/streaming)
 At the time Google designed this project, streaming pipelines are not available in the DataFlow **python** SDK. So the streaming labs are written in Java.
 
 This project is to rewrite the above streaming pipelines in Python (Apache Beam Python):
