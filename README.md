@@ -14,7 +14,6 @@ This project is to rewrite the above streaming pipelines in Python (Apache Beam 
 ## Execution
 ```
 python3 CurrentConditions.py 
-
 --output_path "gs://my-first-gcp-project-271812/javahelp" 
 --runner DataFlowRunner 
 --project "my-first-gcp-project-271812" 
