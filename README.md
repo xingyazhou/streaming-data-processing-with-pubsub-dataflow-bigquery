@@ -1,4 +1,5 @@
-# streaming-data-processing-with-pubsub-dataflow-bigquery [Not Finished!]
+# streaming-data-processing-with-pubsub-dataflow-bigquery 
+[Not Finished!]
 
 ## Introduction
 
@@ -10,6 +11,17 @@ This project is to rewrite the above streaming pipelines in Python (Apache Beam 
 2. Process the simulated traffice sensor data
 3. Write the data into BigQuery for further analysis
 
+## Execution
+```
+python3 CurrentConditions.py 
 
+--output_path "gs://my-first-gcp-project-271812/javahelp" 
+--runner DataFlowRunner 
+--project "my-first-gcp-project-271812" 
+--region "us-central1" 
+--temp_location "gs://my-first-gcp-project-271812/temp" 
+--staging_location "gs://my-first-gcp-project-271812/staging"
+
+```
 
 
