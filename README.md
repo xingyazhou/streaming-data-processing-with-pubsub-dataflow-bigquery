@@ -11,6 +11,16 @@ This project is to rewrite the above streaming pipelines in Python (Apache Beam 
 2. Process the simulated traffice sensor data
 3. Write the data into BigQuery for further analysis
 
+## Preparation
+### Install the Python3 PIP program required to install the API
+sudo apt-get install python3-pip
+
+###	Use PIP3 to install the Google Cloud Pub/Sub API
+sudo pip install -U google-cloud-pubsub
+
+### Use PIP3 to install the Apache Beam
+pip3 install apache-beam[gcp]
+
 ## Execution
 ```
 python3 CurrentConditions.py 
