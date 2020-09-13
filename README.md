@@ -39,3 +39,20 @@ python3 CurrentConditions.py
 ## I/O Throughput Graph
 ![I/O Throughput Graph!](./image/io.PNG "IO")
 
+## Test Data in BigQuery
+```
+SELECT *
+FROM `my-first-gcp-project-271812.trafficsim.current_conditions` 
+LIMIT 15
+```
+
+![Query!](./image/test_query.PNG "IO")
+
+```
+SELECT count(timestamp) as numOfRow
+FROM `my-first-gcp-project-271812.trafficsim.current_conditions` 
+
+Row	numOfRow	
+1	  40545
+```
+
