@@ -1,17 +1,11 @@
-#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Sep 12 17:49:20 2020
 
+@author: xingy
 """
-Copyright Google Inc. 2016
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-http://www.apache.org/licenses/LICENSE-2.0
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-"""
+
+#!/usr/bin/env python
 
 import argparse
 import datetime
@@ -22,10 +16,10 @@ import apache_beam as beam
 import apache_beam.transforms.window as window
 from apache_beam.options.pipeline_options import PipelineOptions
 from google.cloud import pubsub
+from google.cloud import bigquery
 
 PROJECT_NAME='my-first-gcp-project-271812'
 BUCKET_NAME='my-first-gcp-project-271812'
-table_id = "my-first-gcp-project-271812:test.test6"
 
 class GroupWindowsIntoBatches(beam.PTransform):
     """A composite transform that groups Pub/Sub messages based on publish
@@ -41,9 +35,8 @@ class GroupWindowsIntoBatches(beam.PTransform):
             pcoll
             # Assigns window info to each Pub/Sub message based on its
             # publish timestamp.
-            | "Window into Fixed Intervals"
-            >> beam.WindowInto(window.FixedWindows(self.window_size))
-            # | "Add timestamps to messages" >> beam.ParDo(AddTimestamps())
+            | "Window into Fixed Intervals" >> beam.WindowInto(window.FixedWindows(self.window_size))
+            | "Add timestamps to messages" >> beam.ParDo(AddTimestamps())
             # Use a dummy key to group the elements in the same window.
             # Note that all the elements in one window must fit into memory
             # for this. If the windowed elements do not fit into memory,
@@ -53,7 +46,7 @@ class GroupWindowsIntoBatches(beam.PTransform):
             | "Groupby" >> beam.GroupByKey()
             | "Abandon Dummy Key" >> beam.MapTuple(lambda _, val: val)
         )
-
+        
 
 class AddTimestamps(beam.DoFn):
     def process(self, element, publish_time=beam.DoFn.TimestampParam):
@@ -69,7 +62,19 @@ class AddTimestamps(beam.DoFn):
                 float(publish_time)
             ).strftime("%Y-%m-%d %H:%M:%S.%f"),
         }
-
+        
+def parse_json(line):
+    '''Converts line from PubSub back to dictionary
+    '''
+    d={}
+    d["publish_time"] = line["publish_time"]   
+    l = line["message_body"][:-1].split(",")
+    n = ["timestamp",	"latitude",	"longitude",	"highway",	"direction",	"lane",	"speed"]
+    
+    for i,x in enumerate(l):
+        d[n[i]] = x
+        
+    return d  
 
 class WriteBatchesToGCS(beam.DoFn):
     def __init__(self, output_path):
@@ -85,50 +90,66 @@ class WriteBatchesToGCS(beam.DoFn):
 
         with beam.io.gcp.gcsio.GcsIO().open(filename=filename, mode="w") as f:
             for element in batch:
-                f.write("{}\n".format(json.dumps(element)).encode("utf-8"))
+                r = parse_json(element)
+                f.write("{}\n".format(json.dumps(r)).encode("utf-8"))
+                #f.write("{}\n".format(json.dumps(element)).encode("utf-8"))
 
-def run(input_topic, output_path, window_size=1.0, pipeline_args=None):
-    # `save_main_session` is set to true because some DoFn's rely on
-    # globally imported modules.
-    pipeline_options = PipelineOptions(
-        pipeline_args, streaming=True, save_main_session=True
-    )
+class WriteBatchesToBQ(beam.DoFn):
+    def __init__(self,  output_table):
+       
+        self.output_table = output_table
+     
+       
+    def process(self, batch, window=beam.DoFn.WindowParam):
+        client = bigquery.Client()
+        table = client.get_table("my-first-gcp-project-271812.test.test6")
+        rows_to_insert = []
+        for element in batch:
+            row = parse_json(element)
+            rows_to_insert.append(row)
+            
+        errors = client.insert_rows( table, 
+                                    rows_to_insert, 
+                                    row_ids=[None] * len(rows_to_insert)
+                                         )
+                
 
-    schema=' message_boday:STRING'
+def run(input_topic, output_path, output_table, window_size=1.0, pipeline_args=None):
+    
+    pipeline_options = PipelineOptions(pipeline_args, streaming=True, save_main_session=True)
 
-    with beam.Pipeline(options=pipeline_options) as pipeline:
-        (
-            pipeline
-            | "Read PubSub Messages" >> beam.io.ReadFromPubSub(topic="projects/my-first-gcp-project-271812/topics/sandiego")
-            | "Window into" >> GroupWindowsIntoBatches(window_size)
-            | "Write to GCS" >> beam.ParDo(WriteBatchesToGCS(output_path))
-            #| 'Write to BigQuery' >> beam.io.WriteToBigQuery(table_id, schema=schema)
-        )
+    with beam.Pipeline(options=pipeline_options) as pipeline:      
+        batches = (
+                    pipeline
+                    | "Read PubSub Messages" >> beam.io.ReadFromPubSub(topic="projects/my-first-gcp-project-271812/topics/sandiego")
+                    | "Window into Batches" >> GroupWindowsIntoBatches(window_size)  
+                   )
+        
+        batches | "Write to GCS" >> beam.ParDo(WriteBatchesToGCS(output_path))  
+        batches | "Write to BigQuery" >> beam.ParDo(WriteBatchesToBQ(output_table)) 
+        
+if __name__ == "__main__":
 
-if __name__ == "__main__":  # noqa
     logging.getLogger().setLevel(logging.INFO)
-
     parser = argparse.ArgumentParser()
+
     parser.add_argument(
         "--input_topic",
         help="The Cloud Pub/Sub topic to read from.\n"
         '"projects/my-first-gcp-project-271812/topics/sandiago".',
     )
+    
+    
     parser.add_argument(
-        "--window_size",
-        type=float,
-        default=1.0,
-        help="Output file's window size in number of minutes.",
+        '--output_table', 
+        default="my-first-gcp-project-271812.test.test6",
+        help='Output BigQuery table for results specified as: PROJECT:DATASET.TABLE'
     )
-    parser.add_argument(
-        "--output_path",
-        help="GCS Path of the output file including filename prefix.",
-    )
-    known_args, pipeline_args = parser.parse_known_args()
+    
+    parser.add_argument("--window_size", type=float, default=1.0, help="Output file's window size in number of minutes.",)
+    parser.add_argument("--output_path", default="gs://my-first-gcp-project-271812/tmp/simtraffic", help="GCS Path of the output file including filename prefix.",)
+    
+    
 
-    run(
-        known_args.input_topic,
-        known_args.output_path,
-        known_args.window_size,
-        pipeline_args,
-	)
+    known_args, pipeline_args = parser.parse_known_args()
+    run(known_args.input_topic, known_args.output_path, known_args.output_table, known_args.window_size,  pipeline_args=None)
