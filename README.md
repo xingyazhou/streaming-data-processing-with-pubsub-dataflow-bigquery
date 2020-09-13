@@ -21,6 +21,12 @@ sudo pip install -U google-cloud-pubsub
 ### Use PIP3 to install the Apache Beam
 pip3 install apache-beam[gcp]
 
+## Simulate Real Time Traffic
+[send_sensor_data.py](https://github.com/GoogleCloudPlatform/training-data-analyst/tree/master/courses/streaming/publish)
+```
+./send_sensor_data.py --speedFactor=60 --project $DEVSHELL_PROJECT_ID
+```
+
 ## Execution
 ```
 python3 CurrentConditions0913.py 
