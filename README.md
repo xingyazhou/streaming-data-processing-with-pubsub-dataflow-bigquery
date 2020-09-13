@@ -23,13 +23,13 @@ pip3 install apache-beam[gcp]
 
 ## Execution
 ```
-python3 CurrentConditions.py 
---output_path "gs://my-first-gcp-project-271812/javahelp" 
---runner DataFlowRunner 
---project "my-first-gcp-project-271812" 
---region "us-central1" 
---temp_location "gs://my-first-gcp-project-271812/temp" 
---staging_location "gs://my-first-gcp-project-271812/staging"
+python3 CurrentConditions0913.py 
+--output_path "gs://my-first-gcp-project-271812/temp/simtraffic4" \
+--runner DataFlowRunner \
+--project "my-first-gcp-project-271812" \
+--region "us-central1" \
+--temp_location "gs://my-first-gcp-project-271812/temp" \
+--staging_location "gs://my-first-gcp-project-271812/staging" 
 
 ```
 
