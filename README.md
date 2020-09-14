@@ -11,6 +11,8 @@ This project is to rewrite the above streaming pipelines in Python (Apache Beam 
 2. Process the simulated traffice sensor data
 3. Write the data into BigQuery for further analysis
 
+![Streaming Pipeline](./image/streaming_pipelines.PNG)
+
 ## Preparation
 ### Install the Python3 PIP program required to install the API
 sudo apt-get install python3-pip
