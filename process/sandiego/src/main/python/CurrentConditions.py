@@ -102,7 +102,7 @@ class WriteBatchesToBQ(beam.DoFn):
        
     def process(self, batch, window=beam.DoFn.WindowParam):
         client = bigquery.Client()
-        table = client.get_table("my-first-gcp-project-271812.test.test6")
+        table = client.get_table("my-first-gcp-project-271812.trafficsim.current_conditions")
         rows_to_insert = []
         for element in batch:
             row = parse_json(element)
@@ -142,7 +142,7 @@ if __name__ == "__main__":
     
     parser.add_argument(
         '--output_table', 
-        default='my-first-gcp-project-271812:sim_traffic.current_conditions',
+        default='my-first-gcp-project-271812.sim_traffic.current_conditions',
         help='Output BigQuery table for results specified as: PROJECT:DATASET.TABLE'
     )
     
