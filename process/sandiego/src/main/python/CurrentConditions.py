@@ -142,7 +142,7 @@ if __name__ == "__main__":
     
     parser.add_argument(
         '--output_table', 
-        default="my-first-gcp-project-271812.test.test6",
+        default='my-first-gcp-project-271812:sim_traffic.current_conditions',
         help='Output BigQuery table for results specified as: PROJECT:DATASET.TABLE'
     )
     
