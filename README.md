@@ -1,5 +1,4 @@
 # streaming-data-processing-with-pubsub-dataflow-bigquery 
-[Not Finished!]
 
 ## Introduction
 
